@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="3fde7ca7-f588-46f7-b43c-c2c1b6b873d7" >
+		<http:listener-connection host="0.0.0.0" port="${secure::http.port}" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="73c27c35-5772-4b21-bacd-85a24c4339a5" >
+		<db:my-sql-connection host="${secure::db.host}" port="${secure::db.port}" user="${secure::db.user}" password="${secure::db.password}" database="${secure::db.database}" />
+	</db:config>
+	<global-property doc:name="Global Property" doc:id="e2c9f9b8-b03a-4e99-8a5d-6d6f517dbb9b" name="env" value="dev" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="dd7ddd9c-b131-441a-8d28-02b3e65fd228" file="encrypted-app-${env}.properties" key="${encryption.key}" />
+	<flow name="getHotelsByCityFlowImpl" doc:id="af055873-643b-4053-b3ce-6adbcab4af39" >
+		<db:select doc:id="f8c960cf-c10f-4296-aa26-4c70a03eea47" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from oyohotels where city = :city_value]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	city_value: attributes.queryParams.city
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Java To JSON" doc:id="070c05b6-6dcd-4cb9-bdef-cadd129b30ff" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	pincode: payload01.pincode default 0,
+	pricePerDay: payload01.basePricePerDay default 0,
+	hotelName: payload01.name default "",
+	address: payload01.address default "",
+	city: payload01.city default "",
+	emptyRooms: payload01.roomsAvailable default 0,
+	room: {
+		"type": payload01.roomType default "",
+		bedSize: payload01.bedType default "",
+		temperatureControl: payload01.AirConditioner as Boolean default true
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="120a35a8-c061-4049-98e5-b59da712b07a" message="End of the flow - #[flow.name]"/>
+	</flow>
+	<flow name="getHotelByIDFlowImpl" doc:id="f5173d10-ac7f-4ce0-9c29-682518f250db" >
+		<db:select doc:name="Select" doc:id="1e9a132b-27c0-4407-8d27-ce323a193e01" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from oyohotels where ID = :id_value]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id_value: attributes.uriParams.hotelId
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Java To JSON" doc:id="55c77a54-5763-4073-8fe0-1268a687821f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+var data = payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	pincode: payload01.pincode default 0,
+	pricePerDay: payload01.basePricePerDay default 0,
+	hotelName: payload01.name default "",
+	address: payload01.address default "",
+	city: payload01.city default "",
+	emptyRooms: payload01.roomsAvailable default 0,
+	room: {
+		"type": payload01.roomType default "",
+		bedSize: payload01.bedType default "",
+		temperatureControl: payload01.AirConditioner as Boolean default true
+	}
+}
+
+---
+data[0]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger1" doc:id="f01c4727-0410-4e57-9a40-014607593ce8" message="End of Flow - #[flow.name]"/>
+	</flow>
+	
+	
+	    <flow name="postHotelsFlowImpl" doc:id="3bf17e7d-b502-4a45-a4e6-db810d8caeff" >
+        <db:insert doc:name="Insert" doc:id="1fdbbe76-ab72-4070-a590-cd7fb4650ff4" config-ref="Database_Config">
+            <db:sql><![CDATA[insert into oyohotels(ID,pincode,basePricePerDay,name,address,city,roomsAvailable,roomType,bedType,AirConditioner) 
+values(:ID,:pincode,:basePricePerDay,:name,:address,:city,:roomsAvailable,:roomType,:bedType,:AirConditioner)]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+    ID: payload.ID,
+    pincode: payload.pincode,
+    basePricePerDay: payload.pricePerDay ,
+    name: payload.hotelName,
+    address: payload.address,
+    city: payload.city,
+    roomsAvailable: payload.emptyRooms,
+    roomType: payload.room.'type',
+    bedType: payload.room.bedSize,
+    AirConditioner: payload.room.temperatureControl as String
+}]]]></db:input-parameters>
+        </db:insert>
+        <ee:transform doc:name="Transform Message" doc:id="b178fbed-46b3-4b53-b535-843158bc5ddf" >
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    message: if(payload.affectedRows == 1)
+                "Hotel is created"
+            else
+                "Hotel is not created"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="updateHotelsByIDFlowImpl" doc:id="ecabd0da-bcdd-4362-9033-c8b5bede63e8" >
+        <db:update doc:name="Update" doc:id="fc7109a2-5d8e-4fae-9f65-0c7764944ef3" config-ref="Database_Config">
+            <db:sql><![CDATA[UPDATE oyohotels SET pincode = :pincode , basePricePerDay = :basePricePerDay , name = :name , address = :address , city = :city, roomsAvailable = :roomsAvailable, roomType = :roomType, bedType = :bedType, AirConditioner = :AirConditioner WHERE ID = :ID; ]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+    ID: attributes.uriParams.hotelId,
+    pincode: payload.pincode,
+    basePricePerDay: payload.pricePerDay ,
+    name: payload.hotelName,
+    address: payload.address,
+    city: payload.city,
+    roomsAvailable: payload.emptyRooms,
+    roomType: payload.room.'type',
+    bedType: payload.room.bedSize,
+    AirConditioner: payload.room.temperatureControl as String
+}]]]></db:input-parameters>
+        </db:update>
+        <ee:transform doc:name="Transform Message" doc:id="0f03c3ef-d6a5-4dd9-a03e-fa2d40a5c576">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    message: if(payload.affectedRows == 1)
+                "Hotel is updated"
+            else
+                "Hotel is not updated"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="deleteHotelsByIDFlowImpl" doc:id="5cb55873-c78e-46cc-8c92-876f4e6398a2" >
+<set-variable value="#[attributes.uriParams.hotelId]" doc:name="Set Variable" doc:id="261569cf-66e5-42cf-8297-db309c5d48d1" variableName="hotelId"/>
+		<db:delete doc:name="Delete" doc:id="5299d838-8399-4220-9c8f-1a33aaaa32a8" config-ref="Database_Config">
+            <db:sql><![CDATA[delete from oyohotels where ID = :ID]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+    ID: attributes.uriParams.hotelId
+}]]]></db:input-parameters>
+        </db:delete>
+        <ee:transform doc:name="Transform Message" doc:id="4df7e95a-8f2b-4af5-b7b3-296fbd71f555" >
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    message: if(payload == 1)
+                "Hotel with ID " ++ (vars.hotelId default "") ++ " is deleted"
+            else
+                "Hotel with ID " ++ (vars.hotelId default "") ++ " is not deleted"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+	
+	
+	
+	
+	
+</mule>
+
+
+
+
+

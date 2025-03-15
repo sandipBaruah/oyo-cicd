@@ -1,0 +1,138 @@
+#%RAML 1.0
+title: OYO Hotels REST API
+
+types:
+  Hotel: !include dataTypes/HotelDataType.raml
+
+
+
+securitySchemes:
+  client-id-scheme:
+    type: x-client-id
+    describedBy:
+      headers:
+        client_id:
+          required: true
+          type: string
+        client_secret:
+          required: true
+          type: string
+
+traits:
+  unauthorized:
+    responses:
+      401:
+        body:
+          application/json:
+            example:
+              message: Invalid client id and secret
+  server_side_errors:
+    responses:
+      500:
+        body:
+          application/json:
+            example:
+              message: Something went wrong, please try later.
+
+
+
+
+/hotels:
+  is:
+    - unauthorized
+    - server_side_errors
+  securedBy:
+    - client-id-scheme 
+  get: 
+    description: Get Hotels By City
+    displayName: Get Hotels By City
+    queryParameters:
+      city:
+        type: string
+        required: true
+        enum:
+          - Hyderabad
+          - Mumbai
+          - Delhi
+          - Bangalore
+      priceUnder:
+        type: integer
+        minimum: 500
+        maximum: 100000
+        required: false
+        default: 2000
+      startDate:
+        required: false
+        type: string
+        pattern: ^(([0-9])|([0-2][0-9])|([3][0-1])) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}$
+        example: 10 Mar 2025
+      endDate:
+        required: false
+        type: string
+        pattern: ^(([0-9])|([0-2][0-9])|([3][0-1])) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}$
+        example: 10 Mar 2025
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/HotelsExample.raml
+            type: Hotel[]
+                  
+  post:
+    description: Add A Hotel
+    displayName: Add A Hotel
+    body:
+      application/json:
+        example: !include examples/HotelExample.raml
+        type: Hotel
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              message: Hotel is created
+  /{hotelId}:
+    is:
+      - unauthorized
+      - server_side_errors
+    securedBy:
+      - client-id-scheme
+#    uriParameters:
+#      hotelId:
+#        type: integer
+#        required: true
+    get:
+      description: Get A Hotel By ID
+      displayName: Get A Hotel By ID
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/HotelExample.raml
+              type: Hotel
+    put:
+      description: Update A Hotel By ID
+      displayName: Update A Hotel By ID
+      body:
+        application/json:
+          example: !include examples/HotelExample.raml
+          type: Hotel
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Hotel is update
+    delete:
+      description: Delete A Hotel By ID
+      displayName: Delete A Hotel By ID
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                message: Hotel with ID 123 is deleted
+
+
+
+    

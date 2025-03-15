@@ -1,0 +1,28 @@
+%dw 2.0
+
+type auto_af055873_643b_4053_b3ce_6adbcab4af39_Input_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {|  |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|
+    city: "Delhi" | "Mumbai" | "Hyderabad" | "Bangalore", 
+    priceUnder?: Number, 
+    startDate?: String, 
+    endDate?: String
+  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {|  |}, 
+  version: String, 
+  localAddress: String
+|}
+

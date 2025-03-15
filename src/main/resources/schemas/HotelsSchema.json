@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": [
+    {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "pincode": {
+          "type": "integer"
+        },
+        "pricePerDay": {
+          "type": "integer"
+        },
+        "hotelName": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "emptyRooms": {
+          "type": "integer"
+        },
+        "room": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "bedSize": {
+              "type": "string"
+            },
+            "temperatureControl": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "bedSize",
+            "temperatureControl"
+          ]
+        }
+      },
+      "required": [
+        "ID",
+        "pincode",
+        "pricePerDay",
+        "hotelName",
+        "address",
+        "city",
+        "emptyRooms",
+        "room"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "pincode": {
+          "type": "integer"
+        },
+        "pricePerDay": {
+          "type": "integer"
+        },
+        "hotelName": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "emptyRooms": {
+          "type": "integer"
+        },
+        "room": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "bedSize": {
+              "type": "string"
+            },
+            "temperatureControl": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "bedSize",
+            "temperatureControl"
+          ]
+        }
+      },
+      "required": [
+        "ID",
+        "pincode",
+        "pricePerDay",
+        "hotelName",
+        "address",
+        "city",
+        "emptyRooms",
+        "room"
+      ]
+    }
+  ]
+}

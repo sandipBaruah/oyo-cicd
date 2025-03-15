@@ -1,0 +1,17 @@
+#%RAML 1.0 DataType
+type: object
+properties: 
+  ID?: integer
+  pincode: integer
+  pricePerDay: number
+  hotelName: string
+  address: string
+  city: string
+  emptyRooms: integer
+  room:
+    type: object
+    required: true
+    properties:
+      type: string
+      bedSize: string
+      temperatureControl: boolean
