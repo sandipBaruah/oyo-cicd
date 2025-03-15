@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<!-- Add Your Anypoint Platform Organisation ID -->
-	<groupId>4c3c7202-4f54-4d91-9525-2a4f51a863ec</groupId>
+	<groupId>3036af06-20fb-4880-9741-856dc7e1f199</groupId>
 	<artifactId>oyo-hotels-rest-ws</artifactId>
 	<version>1.0.0</version>
 	<packaging>mule-application</packaging>
